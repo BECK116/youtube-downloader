@@ -1,0 +1,16 @@
+   # 忽略 Python 虚拟环境
+   venv/
+
+   # 忽略 Python 编译文件
+   __pycache__/
+   *.pyc
+   *.pyo
+
+   # 忽略操作系统生成的文件
+   .DS_Store
+
+   # 忽略下载的文件
+   downloads/
+
+   # 忽略环境配置文件
+   .env
