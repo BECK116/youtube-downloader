@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Downloader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .hover-effect {
+            transition: transform 0.2s;
+        }
+        .hover-effect:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-2">
+            YouTube Downloader
+        </h1>
+        <p class="text-center text-gray-600 mb-8">
+            输入 YouTube 视频链接，轻松下载高质量视频
+        </p>
+
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6 mb-8">
+            <form id="downloadForm" class="space-y-4">
+                <input 
+                    type="text" 
+                    id="url" 
+                    name="url" 
+                    placeholder="输入 YouTube 视频链接..." 
+                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                >
+                <button 
+                    type="submit" 
+                    class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 hover-effect transition-colors"
+                >
+                    开始下载
+                </button>
+            </form>
+            <div id="progress" class="mt-4 hidden">
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                <p id="progressText" class="text-sm text-gray-600 mt-2"></p>
+            </div>
+        </div>
+
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">已下载的视频</h2>
+            <div class="grid gap-4" id="videoList">
+                {% for video in videos %}
+                <div class="bg-white rounded-lg shadow-md p-4">
+                    <video 
+                        controls 
+                        class="w-full mb-2 rounded"
+                        src="{{ video.path }}"
+                    ></video>
+                    <div class="text-sm text-gray-600">
+                        <p class="font-semibold">{{ video.filename }}</p>
+                        <p>大小: {{ video.size }}</p>
+                        <p>路径: {{ video.path }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('downloadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = document.getElementById('url').value;
+            const progress = document.getElementById('progress');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            progress.classList.remove('hidden');
+            
+            try {
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `url=${encodeURIComponent(url)}`
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'completed') {
+                    // 刷新页面显示新下载的视频
+                    window.location.reload();
+                } else {
+                    progressText.textContent = `错误: ${result.error}`;
+                }
+            } catch (error) {
+                progressText.textContent = `下载失败: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
